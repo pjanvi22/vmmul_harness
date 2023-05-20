@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     // we purposefully run the smallest problem twice so as to "condition"
     // BLAS. For timing purposes, ignore the timing of the first problem size
-    std::vector<int> test_sizes{1024, 1024, 2048, 4096, 8192, 16384};
+    std::vector<int> test_sizes{1024, 2048, 4096, 8192, 16384};
 
     int n_problems = test_sizes.size();
 
@@ -100,8 +100,20 @@ int main(int argc, char** argv)
         // insert end timer code here, and print out the elapsed time for this problem size
         std::chrono::time_point<std::chrono::high_resolution_clock> end_time = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end_time - start_time;
-        printf(" Elapsed time = %f \n",elapsed.count());
-        // now invoke the cblas method to compute the matrix-vector multiplye
+        double elapsed_time = elapsed.count();
+        printf(" Elapsed time = %f \n",elapsed_time);
+        double num_operation = n;
+        double mflops = (num_operation/1e6)/elapsed_time;
+        printf(" MFLOPS = %f \n",elapsed_time);
+
+        double memory_access = n+n;
+        double memory_bytes = memory_access*sizeof(double);
+
+        double percent_memory_bandwidth = (memory_bytes/elapsed_time)/(120); // perlumtter 120 gb/sec memory bandwidth
+        printf(" Percent memory bandwidth = %f \n",elapsed_time);
+
+        double memory_latency = elapsed_time/memory_access;
+        printf(" Memory latency = %f \n",elapsed_time);
         reference_dgemv(n, Acopy, Xcopy, Ycopy);
         // compare your result with that computed by BLAS
         if (check_accuracy(Ycopy, Y, n) == false)
